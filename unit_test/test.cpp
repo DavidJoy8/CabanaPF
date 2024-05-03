@@ -99,10 +99,13 @@ TEST(PFVariables, saveload) {
 
     PFVariables from_file(layout, std::array<std::string, 1>{"a"});
     from_file.load(0, "Test", 0);
+
+    auto vars_view = vars.host_view(0);
+    auto file_view = from_file.host_view(0);
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            EXPECT_EQ(vars[0](i, j, 0), from_file[0](i, j, 0));
-            EXPECT_EQ(vars[0](i, j, 1), from_file[0](i, j, 1));
+            EXPECT_EQ(vars_view(i, j, 0), file_view(i, j, 0));
+            EXPECT_EQ(vars_view(i, j, 1), file_view(i, j, 1));
         }
     }
 }
