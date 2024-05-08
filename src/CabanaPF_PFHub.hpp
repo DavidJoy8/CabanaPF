@@ -179,7 +179,7 @@ class PFHub1aBase : public CabanaPFRunner<2> {
     */
 
     void minor_output() override {
-        std::cout << get_time_done() << "," << free_energy() << std::endl;
+        std::cout << std::setprecision(6) << get_time_done() << "," << free_energy() << std::endl;
     }
     void major_output() override {
         output_c();

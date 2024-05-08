@@ -33,6 +33,8 @@ int main(int argc, char* argv[]) {
                                                              Ns[4], Ns[5], Ns[6], Ns[7], Ns[8], Ns[9]);
             } else
                 throw std::invalid_argument("unrecognized problem name");
+            // print header (must be before adding outputs):
+            std::cout << simulation->subproblem_name() << "\ntime,free_energy" << std::endl;
             // register when to output:
             parser.add_outputs_to_runner(*simulation);
             // do the run:
