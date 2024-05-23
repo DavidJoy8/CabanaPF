@@ -114,8 +114,19 @@ TEST(PFHub1aCHiMaD2023, FullRun) {
 
 // This is a copy of the PFHub1aCHiMaD2023 test case, using PFHub1aCustom to recreate those conditions
 TEST(PFHub1aCustom, 2023) {
-    PFHub1aCustom simulation(96, .5, 3, 4, 8, 6, 1, 5, 2, 1, 0, 0);
+    PFHub1aCustom simulation(96, .5, 3, 4, 8, 6, 1, 5, 2, 1, 0, 0, 0, 0);
     test_periodic(simulation);
+}
+
+TEST(PFHub1aCustom, SineInitialization) {
+    PFHub1aCustom simulation(100, .5, 1, 2, 3, 4, 5, 6, 7, 8, 1.5, 2, .5, 3);
+    simulation.initialize();
+    auto results = simulation.get_cpu_view();
+    EXPECT_NEAR(0.53, results(0, 0, 0), 1e-6);
+    EXPECT_NEAR(0.53106470896, results(2, 3, 0), 1e-9);
+    EXPECT_NEAR(0.48074979829, results(84, 23, 0), 1e-9);
+    EXPECT_NEAR(0.507680709466, results(14, 37, 0), 1e-9);
+    EXPECT_NEAR(0.4999402999244, results(46, 78, 0), 1e-9);
 }
 
 int main(int argc, char** argv) {

@@ -217,22 +217,25 @@ class PFHub1aBenchmark2017 : public PFHub1aBase {
 class PFHub1aCustom : public PFHub1aBase {
   public:
     const int N1, N2, N3, N4, N5, N6, N7, N8, N9, N10;
+    const double A_X, A_Y;
     void initial_conditions() override {
         const auto c = vars[0]; // get View for scope capture
         const auto delta = cell_size;
         const int N1 = this->N1, N2 = this->N2, N3 = this->N3, N4 = this->N4, N5 = this->N5, N6 = this->N6,
                   N7 = this->N7, N8 = this->N8, N9 = this->N9, N10 = this->N10;
+        const double A_X = this->A_X, A_Y = this->A_Y;
         node_parallel_for(
             "custom initial condition", KOKKOS_LAMBDA(const int i, const int j) {
                 // initialize c based on N[1-8]
                 const double x = delta * i;
                 const double y = delta * j;
-                c(i, j, 0) = .5 + .01 * (Kokkos::cos(N1 * M_PI * x / 100) * Kokkos::cos(N2 * M_PI * y / 100) +
-                                         Kokkos::cos(N3 * M_PI * x / 200) * Kokkos::cos(N3 * M_PI * x / 200) *
-                                             Kokkos::cos(N4 * M_PI * y / 200) * Kokkos::cos(N4 * M_PI * y / 200) +
-                                         Kokkos::cos(N5 * M_PI * x / 100 - N6 * M_PI * y / 100) *
-                                             Kokkos::cos(N7 * M_PI * x / 100 - N8 * M_PI * y / 100) +
-                                         Kokkos::sin(N9 * M_PI * x / 100) + Kokkos::sin(N10 * M_PI * y / 100));
+                c(i, j, 0) =
+                    .5 + .01 * (Kokkos::cos(N1 * M_PI * x / 100) * Kokkos::cos(N2 * M_PI * y / 100) +
+                                Kokkos::cos(N3 * M_PI * x / 200) * Kokkos::cos(N3 * M_PI * x / 200) *
+                                    Kokkos::cos(N4 * M_PI * y / 200) * Kokkos::cos(N4 * M_PI * y / 200) +
+                                Kokkos::cos(N5 * M_PI * x / 100 - N6 * M_PI * y / 100) *
+                                    Kokkos::cos(N7 * M_PI * x / 100 - N8 * M_PI * y / 100) +
+                                A_X * Kokkos::sin(N9 * M_PI * x / 100) + A_Y * Kokkos::sin(N10 * M_PI * y / 100));
                 c(i, j, 1) = 0;
             });
     }
@@ -240,16 +243,17 @@ class PFHub1aCustom : public PFHub1aBase {
     std::string subproblem_name() const override {
         std::stringstream s;
         s << "1aCustom_" << N1 << "_" << N2 << "_" << N3 << "_" << N5 << "_" << N6 << "_" << N7 << "_" << N8 << "_"
-          << N9 << "_" << N10;
+          << A_X << "_" << N9 << "_" << A_Y << "_" << N10;
         return s.str();
     }
 
-    // N1-N8: Cosine coefficients.
-    // N9-N10: Sine coefficients.  Setting to 0 eliminates that term since sin(0)=0
-    PFHub1aCustom(int grid_points, double dt, int N1, int N2, int N3, int N4, int N5, int N6, int N7, int N8, int N9,
-                  int N10)
+    // N1-N8: Cosine coefficients - the number of periods that term does over the domain
+    // N9-N10: As above, but for the sines.  Setting to 0 eliminates that term since sin(0)=0
+    // A_X, A_Y: Coefficients that control the weight of the sine terms (compared to 1 for the cosines)
+    PFHub1aCustom(int grid_points, double dt, int N1, int N2, int N3, int N4, int N5, int N6, int N7, int N8,
+                  double A_X, int N9, double A_Y, int N10)
         : PFHub1aBase{grid_points, dt}, N1(N1), N2(N2), N3(N3), N4(N4), N5(N5), N6(N6), N7(N7), N8(N8), N9(N9),
-          N10(N10) {}
+          N10(N10), A_X(A_X), A_Y(A_Y) {}
 };
 
 // Our periodic proposal from the August 2023 CHiMaD meeting
@@ -259,7 +263,8 @@ class PFHub1aCHiMaD2023 : public PFHub1aCustom {
         return "1aCHiMaD2023";
     }
 
-    PFHub1aCHiMaD2023(int grid_points, double dt) : PFHub1aCustom{grid_points, dt, 3, 4, 8, 6, 1, 5, 2, 1, 0, 0} {}
+    PFHub1aCHiMaD2023(int grid_points, double dt)
+        : PFHub1aCustom{grid_points, dt, 3, 4, 8, 6, 1, 5, 2, 1, 0, 0, 0, 0} {}
 };
 
 } // namespace CabanaPF

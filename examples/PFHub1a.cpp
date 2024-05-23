@@ -21,16 +21,22 @@ int main(int argc, char* argv[]) {
             else if (problem_name == "2023")
                 simulation = std::make_unique<PFHub1aCHiMaD2023>(parser.grid_points, parser.dt);
             else if (problem_name == "custom") {
-                const int N_COEFFICIENTS = 10;
+                const int N_COEFFICIENTS = 12;
                 if (argc < arg_start + N_COEFFICIENTS + 1)
-                    throw std::invalid_argument("too few coefficients (need 10) for custom");
-                // read in coefficients:
-                std::array<int, N_COEFFICIENTS> Ns;
-                for (int i = 0; i < N_COEFFICIENTS; i++)
+                    throw std::invalid_argument("too few coefficients (need 12) for custom");
+
+                std::array<int, N_COEFFICIENTS - 2> Ns;
+                // read in cosine terms:
+                for (int i = 0; i < 8; i++)
                     Ns[i] = std::stoi(argv[arg_start + i + 1]);
+                // read in sine terms:
+                const double A_X = std::stod(argv[arg_start + 9]);
+                Ns[8] = std::stoi(argv[arg_start + 10]);
+                const double A_Y = std::stod(argv[arg_start + 11]);
+                Ns[9] = std::stoi(argv[arg_start + 12]);
                 // make problem:
                 simulation = std::make_unique<PFHub1aCustom>(parser.grid_points, parser.dt, Ns[0], Ns[1], Ns[2], Ns[3],
-                                                             Ns[4], Ns[5], Ns[6], Ns[7], Ns[8], Ns[9]);
+                                                             Ns[4], Ns[5], Ns[6], Ns[7], A_X, Ns[8], A_Y, Ns[9]);
             } else
                 throw std::invalid_argument("unrecognized problem name");
             // print header (must be before adding outputs):
